@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de Conversão Energética Supergasbras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  /* Paleta Supergasbras */
+  --sg-red:#D33100; --sg-yellow:#F0BE00; --sg-peach:#FBC5A7; --sg-peach-2:#FDE1CE; --sg-rose:#FAEAE5;
+  --sg-cream:#F2F2E8; --sg-lemon:#FFF0B3; --sg-dark:#252423; --sg-g1:#575756; --sg-g2:#666666; --sg-g3:#B2B2B2; --sg-g4:#E6E6E6;
+  --page:var(--sg-cream);
+  --sheet:#FFFFFF;
+  --sheet-2:#F7F7F2;
+  --line:var(--sg-g4);
+  --ink:var(--sg-dark);
+  --ink-2:var(--sg-g1);
+  --ink-3:var(--sg-g2);
+  --fill:var(--sg-peach-2);
+  --fill-line:var(--sg-peach);
+  --fill-focus:var(--sg-red);
+  --glp:var(--sg-red); --fuel:var(--sg-yellow);
+  --good:#1f7a45; --bad:var(--sg-red);
+  --panel:var(--sg-dark); --panel-2:#363533; --panel-line:#3d3c3a;
+  --p-ink:#FFFFFF; --p-ink-2:var(--sg-g3); --p-ink-3:#8f8f8d;
+  --p-glp:#E8541C; --p-fuel:var(--sg-yellow); --p-good:#7fd6a0; --p-bad:var(--sg-peach);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 100}
+.num{font-variant-numeric:tabular-nums}
+.wide-type{font-stretch:112%;font-variation-settings:"wdth" 112}
+
+/* ---------- topo ---------- */
+.top{background:var(--sg-dark);color:#fff;border-bottom:4px solid var(--sg-red)}
+.top-in{max-width:1240px;margin:0 auto;padding:22px 24px 0;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px}
+.brand{display:flex;align-items:center;gap:14px;padding-bottom:18px}
+.logo{height:52px;min-width:120px;max-width:200px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:6px 10px;cursor:pointer;border:0;font:inherit;color:var(--sg-g2);font-size:12px;font-weight:600;flex:none}
+.logo img{height:58px;width:auto;display:block}
+.logo:not(.empty){background:transparent;padding:0;min-width:0;max-width:none;height:auto;cursor:default}
+.brand .sepv{width:1px;align-self:stretch;background:#4a4947;margin:4px 4px}
+.logo.empty{border:2px dashed var(--sg-peach);background:rgba(255,255,255,.92)}
+.logo:focus-visible{outline:2px solid var(--sg-yellow);outline-offset:2px}
+.brand h1{margin:0;font-size:21px;line-height:1.15;font-weight:750;font-variation-settings:"wdth" 118;letter-spacing:-.005em}
+.brand p{margin:2px 0 0;font-size:13px;color:var(--sg-g3)}
+.tabs{display:flex;gap:2px}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--sg-g3);font:inherit;font-size:14px;font-weight:600;padding:12px 18px 14px;border-radius:10px 10px 0 0;cursor:pointer}
+.tabs button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tabs button[aria-selected="true"]{background:var(--page);color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--sg-yellow);outline-offset:-2px}
+
+.wrap{max-width:1240px;margin:0 auto;padding:28px 24px 56px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:28px;align-items:start}
+@media (max-width:1020px){.layout{grid-template-columns:minmax(0,1fr)}.result{position:static}}
+.panel[hidden]{display:none}
+
+/* ---------- folha de preenchimento ---------- */
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:6px}
+.sheet + .sheet{margin-top:20px}
+.sheet-h{padding:20px 24px 4px}
+.sheet-h h2{margin:0;font-size:17px;font-weight:700}
+.sheet-h p{margin:4px 0 0;color:var(--ink-2);font-size:13.5px;max-width:62ch}
+.sheet-b{padding:12px 24px 22px}
+
+.grid3{display:grid;grid-template-columns:minmax(150px,.9fr) minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line)}
+.grid3 > div{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;min-height:58px}
+.grid3 > .k{color:var(--ink-2);font-size:13.5px;font-weight:500;padding-left:0;line-height:1.3}
+.grid3 > .hd{min-height:0;padding-top:14px;padding-bottom:10px;font-weight:700;font-size:14px;gap:8px}
+.grid3 > .span2{grid-column:span 2}
+.grid3 .calc{font-weight:600;font-size:16px;justify-content:flex-end;width:100%;text-align:right}
+.chip{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none}
+.chip.glp{background:var(--glp)} .chip.fuel{background:var(--fuel);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.tag{font-size:11.5px;font-weight:600;color:var(--ink-3);margin-left:auto}
+
+.inp{position:relative;width:100%}
+.inp input,.inp select{width:100%;height:42px;padding:0 74px 0 12px;border:1px solid var(--fill-line);background:var(--fill);color:var(--ink);border-radius:4px;font:inherit;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.inp select{padding:0 34px 0 12px;text-align:left;font-size:15px;appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%),linear-gradient(135deg,var(--ink-2) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px;background-repeat:no-repeat}
+.inp input[type=text],.inp input[type=search]{text-align:left;padding-right:12px;font-weight:500}
+.inp input:focus,.inp select:focus{outline:none;border-color:var(--fill-focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--fill-focus) 22%,transparent)}
+.inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:12.5px;pointer-events:none}
+.fixed{white-space:nowrap;overflow:hidden;height:42px;display:flex;align-items:center;justify-content:flex-end;width:100%;padding:0 12px;border-radius:4px;background:var(--sheet-2);font-weight:600;font-variant-numeric:tabular-nums}
+.fixed.center{justify-content:center}
+.legend{display:flex;gap:18px;margin-top:14px;font-size:12.5px;color:var(--ink-3)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:6px}
+.legend .a{background:var(--fill);border:1px solid var(--fill-line)} .legend .b{background:var(--sheet-2);border:1px solid var(--line)}
+
+/* campos do estudo */
+label.f{display:block;margin-bottom:12px}
+label.f > span{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);margin-bottom:5px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sheet h3{font-size:14px;font-weight:700;margin:18px 0 10px;color:var(--ink)}
+details{border-top:1px solid var(--line);margin-top:14px;padding-top:6px}
+details > summary{cursor:pointer;font-weight:700;font-size:15px;padding:10px 0;display:flex;align-items:center;gap:8px;list-style:none}
+details > summary::-webkit-details-marker{display:none}
+details > summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);transition:transform .15s}
+details[open] > summary::after{transform:rotate(-135deg)}
+.dot{width:10px;height:10px;border-radius:2px;display:inline-block;flex:none}
+.dot.atual{background:var(--fuel);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)} .dot.glp{background:var(--glp)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.facts div{background:var(--sg-lemon);padding:10px 12px}
+.facts span{display:block;font-size:12px;color:var(--ink-3)}
+.facts b{font-variant-numeric:tabular-nums}
+.hint{font-size:13px;color:var(--ink-3);margin:10px 0 0}
+.link{background:none;border:0;padding:0;color:var(--sg-red);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- painel de resultado ---------- */
+.result{position:sticky;top:20px;background:var(--panel);color:var(--p-ink);border-radius:6px;overflow:hidden;border-top:5px solid var(--sg-red)}
+.r-sec{padding:22px 26px;border-top:1px solid var(--panel-line)}
+.r-sec:first-child{border-top:0}
+.r-label{font-size:13px;color:var(--p-ink-2);margin:0 0 4px}
+.verdict{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;margin:0 0 14px}
+.verdict .badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:13px;font-weight:800;flex:none}
+.verdict.pos{color:var(--p-good)} .verdict.pos .badge{background:var(--p-good);color:var(--panel)}
+.verdict.neg{color:var(--p-bad)} .verdict.neg .badge{background:var(--p-bad);color:var(--panel)}
+.verdict.eq{color:var(--p-ink-2)} .verdict.eq .badge{background:var(--p-ink-3);color:var(--panel)}
+.hero{font-size:clamp(34px,4.2vw,46px);line-height:1;font-weight:780;font-variation-settings:"wdth" 116;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hero small{font-size:.38em;font-weight:600;color:var(--p-ink-2);letter-spacing:0;margin-left:6px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.pair .v{font-size:21px;font-weight:700;font-variation-settings:"wdth" 110;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pos-c{color:var(--p-good)} .neg-c{color:var(--p-bad)}
+
+.cmp{margin-top:4px}
+.cmp-row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:12px 0;cursor:default}
+.cmp-row .n{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--p-ink)}
+.cmp-row .n .chip.glp{background:var(--p-glp)} .cmp-row .n .chip.fuel{background:var(--p-fuel)}
+.cmp-row .v{font-weight:650;font-variant-numeric:tabular-nums;font-size:14px}
+.track{grid-column:1 / -1;height:12px;background:var(--panel-2);border-radius:0 3px 3px 0}
+.bar{height:100%;border-radius:0 3px 3px 0;transition:width .45s cubic-bezier(.2,.7,.2,1);min-width:2px}
+.bar.glp{background:var(--p-glp)} .bar.fuel{background:var(--p-fuel)}
+.cmp-row .sub{grid-column:1 / -1;font-size:12px;color:var(--p-ink-3)}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+
+.equiv{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.equiv .q{font-size:24px;font-weight:750;font-variation-settings:"wdth" 114;font-variant-numeric:tabular-nums}
+.equiv .eqs{color:var(--p-ink-3);font-size:20px}
+.equiv .w{color:var(--p-ink-2);font-size:13.5px}
+
+/* ---------- tabelas ---------- */
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th:last-child,td:last-child{padding-right:0}
+th{font-size:12.5px;color:var(--ink-3);font-weight:600}
+tr.sub td{font-weight:650;background:var(--sg-rose)}
+tr.tot td{font-weight:750;border-top:2px solid var(--ink);border-bottom:0;font-size:15px}
+td .dot{margin-right:6px;vertical-align:0}
+.pos-t{color:var(--good)} .neg-t{color:var(--bad)}
+#tPci tr{cursor:pointer} #tPci tr:hover td{background:var(--sheet-2)}
+
+.report{white-space:pre-wrap;background:var(--sg-rose);border-left:3px solid var(--sg-red);padding:16px 18px;font-size:13.5px;line-height:1.6;max-height:420px;overflow:auto;margin-top:14px}
+.btn{appearance:none;border:0;background:var(--sg-red);color:#fff;padding:10px 16px;border-radius:4px;font:inherit;font-size:14px;font-weight:650;cursor:pointer}
+.btn:hover{opacity:.9}
+.btn:focus-visible,.link:focus-visible{outline:2px solid var(--glp);outline-offset:2px}
+.flex{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.right{margin-left:auto}
+
+.tip{position:fixed;pointer-events:none;background:var(--sheet);color:var(--ink);padding:8px 10px;border-radius:4px;font-size:12.5px;line-height:1.45;white-space:nowrap;opacity:0;transition:opacity .1s;z-index:9;box-shadow:0 4px 18px rgba(10,20,40,.25)}
+.src{font-size:12.5px;color:var(--ink-3);margin-top:28px;max-width:100ch}
+
+@media (max-width:640px){
+  .top-in,.wrap{padding-left:16px;padding-right:16px}
+  .brand{flex-wrap:wrap;gap:10px}.brand .sepv{display:none}.logo img{height:46px}.brand h1{font-size:18px}
+  .tabs{width:100%} .tabs button{flex:1;padding:12px 6px 14px;font-size:13px}
+  .grid3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .grid3 > div{padding:8px 4px}
+  .inp input{padding-right:48px;font-size:15px}
+  .inp .u{font-size:11px;right:8px}
+  .fixed{font-size:14px;padding:0 8px}
+  .grid3 .hd{font-size:13px}
+  .grid3 > .k{grid-column:1 / -1;min-height:0;padding:12px 0 0;border-bottom:0}
+  .grid3 > .hd.k{display:none}
+  .grid3 > .span2{grid-column:1 / -1}
+  .sheet-h,.sheet-b{padding-left:16px;padding-right:16px}
+  .r-sec{padding:20px}
+  .row3{grid-template-columns:1fr 1fr 1fr}
+  .facts{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <div class="brand">
+    <button class="logo empty" id="logoBtn" title="Supergasbras">Inserir logo</button><input type="file" id="logoFile" accept="image/*" hidden><span class="sepv" aria-hidden="true"></span>
+    <div><h1>Calculadora de Conversão Energética</h1><p>Comparativo energético: GLP x combustível atual do cliente</p></div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Seções">
+    <button role="tab" data-tab="simulador" aria-selected="true">Simulador</button>
+    <button role="tab" data-tab="estudo" aria-selected="false">Estudo de conversão</button>
+    <button role="tab" data-tab="tabela" aria-selected="false">Tabela de PCI</button>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<!-- ============ SIMULADOR ============ -->
+<section class="panel" data-panel="simulador">
+ <div class="layout">
+  <div class="sheet">
+    <div class="sheet-h"><h2>Comparativo energético comercial</h2>
+      <p>Escolha o produto usado hoje e preencha os campos em laranja. O cálculo compara apenas o poder calorífico, sem considerar a eficiência da queima.</p></div>
+    <div class="sheet-b">
+      <div class="grid3">
+        <div class="hd k"></div>
+        <div class="hd"><span class="chip glp"></span>GLP</div>
+        <div class="hd"><span class="chip fuel"></span>Produto atual</div>
+
+        <div class="k">Produto</div>
+        <div><div class="fixed center">GLP</div></div>
+        <div><div class="inp"><select id="fuel" aria-label="Produto atual"></select></div></div>
+
+        <div class="k">Preço</div>
+        <div><div class="inp"><input id="pGlp" type="number" inputmode="decimal" step="0.01" min="0" value="5.60" aria-label="Preço do GLP"><span class="u">R$/kg</span></div></div>
+        <div><div class="inp"><input id="pAtual" type="number" inputmode="decimal" step="0.01" min="0" value="0.47" aria-label="Preço do produto atual"><span class="u" id="uPreco">R$/kg</span></div></div>
+
+        <div class="k">Poder calorífico (PCI)</div>
+        <div><div class="fixed" id="pciGlpTxt">11.500 kcal/kg</div></div>
+        <div><div class="fixed" id="pciAtualTxt">—</div></div>
+
+        <div class="k" id="lblEf">Eficiência do PCI do GLP</div>
+        <div class="span2"><div class="fixed" id="efPci">—</div></div>
+
+        <div class="k">Consumo equivalente / atual</div>
+        <div><div class="fixed" id="cGlpTxt">—</div></div>
+        <div><div class="inp"><input id="cAtual" type="number" inputmode="decimal" step="1" min="0" value="141900" aria-label="Consumo atual"><span class="u" id="uCons">kg/mês</span></div></div>
+
+        <div class="k">Custo previsto vs atual</div>
+        <div><div class="fixed" id="custoGlp">—</div></div>
+        <div><div class="fixed" id="custoAtual">—</div></div>
+      </div>
+      <div class="legend"><span><i class="a"></i>Preencher</span><span><i class="b"></i>Calculado</span></div>
+      <p class="hint">Para incluir eficiência de queima, energia elétrica, manutenção e impostos, abra o <button class="link" data-go="estudo">Estudo de conversão</button>.</p>
+    </div>
+  </div>
+
+  <aside class="result" aria-live="polite">
+    <div class="r-sec">
+      <p class="verdict" id="verdict"></p>
+      <p class="r-label">Economia mensal</p>
+      <div class="hero" id="kEco">—</div>
+      <div class="pair">
+        <div><p class="r-label">Economia anual</p><div class="v" id="kEcoAno">—</div></div>
+        <div><p class="r-label">Percentual de economia</p><div class="v" id="kPct">—</div></div>
+      </div>
+    </div>
+    <div class="r-sec">
+      <p class="r-label">Custo mensal de cada sistema</p>
+      <div class="cmp" id="chart">
+        <div class="cmp-row" data-k="atual"><div class="n"><span class="chip fuel"></span><span id="nmAtual">Atual</span></div><div class="v" id="vAtual"></div><div class="track"><div class="bar fuel" id="bAtual"></div></div></div>
+        <div class="cmp-row" data-k="glp"><div class="n"><span class="chip glp"></span>GLP</div><div class="v" id="vGlp"></div><div class="track"><div class="bar glp" id="bGlp"></div></div></div>
+      </div>
+    </div>
+    <div class="r-sec">
+      <p class="r-label">Equivalência energética</p>
+      <div class="equiv"><span class="q">1 kg</span><span class="w">de GLP</span><span class="eqs">=</span><span class="q" id="eqVal">—</span><span class="w" id="eqName">—</span></div>
+    </div>
+  </aside>
+ </div>
+</section>
+
+<!-- ============ ESTUDO ============ -->
+<section class="panel" data-panel="estudo" hidden>
+ <div class="layout">
+  <div>
+    <div class="sheet">
+      <div class="sheet-h"><h2>Dados do Simulador</h2><p>Preço e consumo vêm do <button class="link" data-go="simulador">Simulador</button>. Altere-os lá.</p></div>
+      <div class="sheet-b"><div class="facts" id="simResumo"></div></div>
+    </div>
+    <div class="sheet">
+      <div class="sheet-h"><h2>Dados do estudo</h2><p>Preencha o que se aplica ao processo do cliente. Campos com zero não entram no cálculo.</p></div>
+      <div class="sheet-b">
+        <div class="row">
+          <label class="f"><span>Cliente</span><div class="inp"><input id="cliente" type="text" placeholder="Nome do cliente"></div></label>
+          <label class="f"><span>Processo ou equipamento</span><div class="inp"><input id="processo" type="text" placeholder="Ex.: forno, caldeira"></div></label>
+        </div>
+        <h3>Eficiência de queima</h3>
+        <div class="row">
+          <label class="f"><span><i class="dot atual"></i><span id="lblEffA">Produto</span></span><div class="inp"><input id="effAtual" type="number" step="1" min="1" max="100" value="87"><span class="u">%</span></div></label>
+          <label class="f"><span><i class="dot glp"></i>GLP</span><div class="inp"><input id="effGlp" type="number" step="1" min="1" max="100" value="95"><span class="u">%</span></div></label>
+        </div>
+        <h3>Energia elétrica</h3>
+        <div class="row">
+          <label class="f"><span>Tarifa fora de ponta (HFP)</span><div class="inp"><input id="tHfp" type="number" step="0.01" value="0.19"><span class="u">R$/kWh</span></div></label>
+          <label class="f"><span>Tarifa na ponta (HP)</span><div class="inp"><input id="tHp" type="number" step="0.01" value="0.48"><span class="u">R$/kWh</span></div></label>
+        </div>
+        <div class="row">
+          <label class="f"><span>Crédito de PIS/COFINS</span><div class="inp"><input id="e_pis" type="number" step="0.01" value="9.25"><span class="u">%</span></div></label>
+          <label class="f"><span>Crédito de ICMS</span><div class="inp"><input id="e_icms" type="number" step="0.01" value="9"><span class="u">%</span></div></label>
+        </div>
+<details open>
+            <summary><i class="dot atual"></i>Sistema atual</summary>
+            <h3>Equipamentos elétricos</h3>
+            <div class="row3">
+              <label class="f"><span>Potência</span><div class="inp"><input id="a_kw" type="number" value="0"><span class="u">kW</span></div></label>
+              <label class="f"><span>Horas/dia HFP</span><div class="inp"><input id="a_hfp" type="number" value="0"><span class="u">h</span></div></label>
+              <label class="f"><span>Horas/dia HP</span><div class="inp"><input id="a_hp" type="number" value="0"><span class="u">h</span></div></label>
+            </div>
+            <label class="f"><span>Dias de operação por mês</span><div class="inp"><input id="a_dias" type="number" value="30"><span class="u">dias</span></div></label>
+            <h3>Outros custos mensais</h3>
+            <div class="row">
+              <label class="f"><span>Filtro de mangas</span><div class="inp"><input id="a_mangas" type="number" value="0"><span class="u">R$/mês</span></div></label>
+              <label class="f"><span>Soda cáustica / insumos</span><div class="inp"><input id="a_insumos" type="number" value="0"><span class="u">R$/mês</span></div></label>
+            </div>
+            <div class="row">
+              <label class="f"><span>Manutenção e mão-de-obra</span><div class="inp"><input id="a_manut" type="number" value="0"><span class="u">R$/mês</span></div></label>
+              <label class="f"><span>Depreciação de equipamentos</span><div class="inp"><input id="a_depr" type="number" value="0"><span class="u">R$/mês</span></div></label>
+            </div>
+            <h3>Créditos tributários sobre o combustível</h3>
+            <div class="row">
+              <label class="f"><span>Crédito PIS/COFINS</span><div class="inp"><input id="a_pis" type="number" step="0.01" value="0"><span class="u">%</span></div></label>
+              <label class="f"><span>Crédito ICMS</span><div class="inp"><input id="a_icms" type="number" step="0.01" value="0"><span class="u">%</span></div></label>
+            </div>
+          </details>
+
+          <details open>
+            <summary><i class="dot glp"></i>Sistema a GLP</summary>
+            <h3>Equipamentos elétricos (queimador e vaporizador)</h3>
+            <div class="row3">
+              <label class="f"><span>Potência</span><div class="inp"><input id="g_kw" type="number" value="0"><span class="u">kW</span></div></label>
+              <label class="f"><span>Horas/dia HFP</span><div class="inp"><input id="g_hfp" type="number" value="12"><span class="u">h</span></div></label>
+              <label class="f"><span>Horas/dia HP</span><div class="inp"><input id="g_hp" type="number" value="0"><span class="u">h</span></div></label>
+            </div>
+            <label class="f"><span>Dias de operação por mês</span><div class="inp"><input id="g_dias" type="number" value="30"><span class="u">dias</span></div></label>
+            <h3>Outros custos mensais</h3>
+            <div class="row">
+              <label class="f"><span>Filtro de mangas</span><div class="inp"><input id="g_mangas" type="number" value="0"><span class="u">R$/mês</span></div></label>
+              <label class="f"><span>Manutenção e mão-de-obra</span><div class="inp"><input id="g_manut" type="number" value="0"><span class="u">R$/mês</span></div></label>
+            </div>
+            <label class="f"><span>Depreciação de equipamentos</span><div class="inp"><input id="g_depr" type="number" value="0"><span class="u">R$/mês</span></div></label>
+            <h3>Créditos tributários sobre o GLP</h3>
+            <div class="row">
+              <label class="f"><span>Crédito PIS/COFINS</span><div class="inp"><input id="g_pis" type="number" step="0.01" value="0"><span class="u">%</span></div></label>
+              <label class="f"><span>Crédito ICMS</span><div class="inp"><input id="g_icms" type="number" step="0.01" value="0"><span class="u">%</span></div></label>
+            </div>
+          </details>
+          <details open>
+            <summary>Investimento na conversão</summary>
+            <label class="f"><span>Valor investido (usado no cálculo do payback)</span><div class="inp"><input id="invest" type="number" step="100" value="0"><span class="u">R$</span></div></label>
+          </details>      </div>
+    </div>
+  </div>
+
+  <div>
+    <aside class="result" aria-live="polite">
+      <div class="r-sec">
+        <p class="verdict" id="dVerdict"></p>
+        <p class="r-label">Saldo mensal com eficiência e custos</p>
+        <div class="hero" id="dEco">—</div>
+        <div class="pair">
+          <div><p class="r-label">Saldo anual</p><div class="v" id="dEcoAno">—</div></div>
+          <div><p class="r-label">Payback</p><div class="v" id="dPay">—</div></div>
+        </div>
+      </div>
+      <div class="r-sec">
+        <p class="r-label">Consumo real de GLP</p>
+        <div class="equiv"><span class="q" id="dGlp">—</span><span class="w">kg/mês</span></div>
+        <p class="r-label" style="margin-top:14px" id="dEquiv"></p>
+      </div>
+    </aside>
+  </div>
+ </div>
+
+ <div class="sheet" style="margin-top:28px">
+   <div class="sheet-h"><h2>Correção do PCI pela eficiência</h2></div>
+   <div class="sheet-b"><table>
+     <thead><tr><th>Combustível</th><th>PCI</th><th>Eficiência</th><th>PCI corrigido</th><th>R$ por 1.000 kcal úteis</th></tr></thead>
+     <tbody id="tEq"></tbody></table></div>
+ </div>
+ <div class="sheet">
+   <div class="sheet-h"><h2>Comparativo mensal: sistema atual x sistema a GLP</h2><p>Na coluna diferença, valores positivos estão a favor do GLP.</p></div>
+   <div class="sheet-b"><table>
+     <thead><tr><th>Item</th><th><i class="dot atual"></i><span id="thAtual">Atual</span></th><th><i class="dot glp"></i>GLP</th><th>Diferença</th></tr></thead>
+     <tbody id="tDet"></tbody></table></div>
+ </div>
+ <div class="sheet">
+   <div class="sheet-h flex"><h2>Resumo para o cliente</h2><button class="btn right" id="copy">Copiar resumo</button></div>
+   <div class="sheet-b"><div class="report" id="report"></div></div>
+ </div>
+</section>
+
+<!-- ============ TABELA ============ -->
+<section class="panel" data-panel="tabela" hidden>
+  <div class="sheet">
+    <div class="sheet-h flex"><div><h2>Poder calorífico inferior dos combustíveis</h2><p>Clique em uma linha para usar o combustível no Simulador.</p></div>
+      <div class="inp right" style="width:260px"><input id="busca" type="search" placeholder="Buscar combustível" aria-label="Buscar combustível"></div></div>
+    <div class="sheet-b"><table>
+      <thead><tr><th>Combustível</th><th>PCI</th><th>Unidade</th><th>Quantidade equivalente a 1 kg de GLP</th></tr></thead>
+      <tbody id="tPci"></tbody></table></div>
+  </div>
+</section>
+
+<p class="src">Poder calorífico conforme a aba Dados da planilha de conversão energética (tabela de PCI Aalborg Industries e CTGAS); GLP com 11.500 kcal/kg, como na aba Simulador. As eficiências de queima são empíricas e variam conforme o processo. Os resultados são estimativas e não substituem a análise técnica do processo do cliente.</p>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+window.LOGO_SRC="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIzMjYuMCAxODY3LjcgNTAxNi41IDE5MzMuMSI+CgoKPHBhdGggZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsPSJyZ2IoODMuMTE0NjI0JSwgMTcuMTYwMDM0JSwgMTMuNzg3ODQyJSkiIGZpbGwtb3BhY2l0eT0iMSIgZD0iTSAzMTc1LjgzOTg0NCAyNDg4LjM1MTU2MiBDIDMxNzUuODM5ODQ0IDIzODAuOTE0MDYyIDMxMjUuODgyODEyIDIyODUuMzQ3NjU2IDMwNDguMTEzMjgxIDIyMjMuMDE5NTMxIEMgMzAzNi44NjcxODggMjIxNC4wMDM5MDYgMzAxMi42OTkyMTkgMjE5My4zNzEwOTQgMzAxMi42OTkyMTkgMjE1My4zMjAzMTIgTCAzMDEyLjY5OTIxOSAxOTMzLjM3ODkwNiBDIDI5NzEuNjY0MDYyIDE5MjAuMTkxNDA2IDI5MjguNjI1IDE5MTEuNjIxMDk0IDI4ODQuMjA3MDMxIDE5MDcuODQzNzUgTCAyODg0LjIwNzAzMSAyMjIyLjU3NDIxOSBDIDI4ODQuMjA3MDMxIDIyODIuNjYwMTU2IDI5MTUuNDM3NSAyMzExLjcxNDg0NCAyOTI5LjU2NjQwNiAyMzE5LjY1NjI1IEMgMjk4OC42NzU3ODEgMjM1Mi44NDc2NTYgMzAyOC43MTA5MzggMjQxNS43MDcwMzEgMzAyOC43MTA5MzggMjQ4OC4zNTE1NjIgQyAzMDI4LjcxMDkzOCAyNTk1LjcxNDg0NCAyOTQxLjY2Nzk2OSAyNjgyLjc2OTUzMSAyODM0LjI4MTI1IDI2ODIuNzY5NTMxIEMgMjcyNi45MTQwNjIgMjY4Mi43Njk1MzEgMjYzOS44NjcxODggMjU5NS43MTQ4NDQgMjYzOS44NjcxODggMjQ4OC4zNTE1NjIgQyAyNjM5Ljg2NzE4OCAyNDE1LjcwMzEyNSAyNjc5Ljg5MDYyNSAyMzUyLjc2MTcxOSAyNzM4Ljk4ODI4MSAyMzE5LjU1MDc4MSBDIDI3NTMuNzY5NTMxIDIzMTEuMjQ2MDk0IDI3ODYuNTYyNSAyMjgyLjY2MDE1NiAyNzg2LjU2MjUgMjIyMi41NzQyMTkgTCAyNzg2LjU2MjUgMTkwNy43MzgyODEgQyAyNzQyLjE2MDE1NiAxOTExLjM0Mzc1IDI2OTkuMDk3NjU2IDE5MTkuNTg1OTM4IDI2NTguMDYyNSAxOTMyLjU4MjAzMSBMIDI2NTguMDYyNSAyMTUzLjMyMDMxMiBDIDI2NTguMDYyNSAyMTkzLjM3MTA5NCAyNjMzLjYwOTM3NSAyMjE0LjE5NTMxMiAyNjIyLjI0MjE4OCAyMjIzLjMzNTkzOCBDIDI1NDQuNjkxNDA2IDIyODUuNjc5Njg4IDI0OTQuOTI5Njg4IDIzODEuMDk3NjU2IDI0OTQuOTI5Njg4IDI0ODguMzUxNTYyIEMgMjQ5NC45Mjk2ODggMjY3Ni4zNjcxODggMjY0Ny4zNTU0NjkgMjgyOC43ODUxNTYgMjgzNS4zNzEwOTQgMjgyOC43ODUxNTYgQyAzMDIzLjQxNDA2MiAyODI4Ljc4NTE1NiAzMTc1LjgzOTg0NCAyNjc2LjM2NzE4OCAzMTc1LjgzOTg0NCAyNDg4LjM1MTU2MiBNIDM0MTcuMzEyNSAyNDg4LjM0NzY1NiBDIDM0MTcuMzEyNSAyMjY1LjQ4MDQ2OSAzMjkyLjE3NTc4MSAyMDcxLjk4NDM3NSAzMTA4LjM5ODQzOCAxOTczLjg3MTA5NCBMIDMxMDguMzk4NDM4IDIxNDcuMTI4OTA2IEMgMzIwOC40MjU3ODEgMjIyNy4yNjU2MjUgMzI3Mi42Mjg5MDYgMjM1MC4yMjY1NjIgMzI3Mi42Mjg5MDYgMjQ4OC4zNDc2NTYgQyAzMjcyLjYyODkwNiAyNzI5LjgyODEyNSAzMDc2Ljg3MTA5NCAyOTI1LjU4OTg0NCAyODM1LjM3MTA5NCAyOTI1LjU4OTg0NCBDIDI1OTMuODk4NDM4IDI5MjUuNTg5ODQ0IDIzOTguMTMyODEyIDI3MjkuODI4MTI1IDIzOTguMTMyODEyIDI0ODguMzQ3NjU2IEMgMjM5OC4xMzI4MTIgMjM1MS4xOTkyMTkgMjQ2MS4zNzg5MDYgMjIyOC45MjE4NzUgMjU2MC4xNzk2ODggMjE0OC43NTc4MTIgTCAyNTYwLjE3OTY4OCAxOTczLjg3MTA5NCBDIDIzNzYuNDE3OTY5IDIwNzEuOTg0Mzc1IDIyNTEuMjczNDM4IDIyNjUuNDgwNDY5IDIyNTEuMjczNDM4IDI0ODguMzQ3NjU2IEMgMjI1MS4yNzM0MzggMjgxMC4zMzU5MzggMjUxMi4zMDA3ODEgMzA3MS4zNjcxODggMjgzNC4yODEyNSAzMDcxLjM2NzE4OCBDIDMxNTYuMjkyOTY5IDMwNzEuMzY3MTg4IDM0MTcuMzEyNSAyODEwLjMzNTkzOCAzNDE3LjMxMjUgMjQ4OC4zNDc2NTYgIi8+CjxwYXRoIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbD0icmdiKDEwMCUsIDEwMCUsIDEwMCUpIiBmaWxsLW9wYWNpdHk9IjEiIGQ9Ik0gNDY4LjcwMzEyNSAzNDU1LjczNDM3NSBDIDQ2OC43MDMxMjUgMzQzMi4yNjE3MTkgNDkyLjE3NTc4MSAzNDE5LjM1MTU2MiA1MzIuMDc0MjE5IDM0MTkuMzUxNTYyIEMgNTc1LjQ5NjA5NCAzNDE5LjM1MTU2MiA2MDYuMDAzOTA2IDM0MzQuMDE1NjI1IDYzMC42NDg0MzggMzQ1OC4wNzgxMjUgTCA2OTAuNDk2MDk0IDMzOTguMjI2NTYyIEMgNjY0LjY3OTY4OCAzMzcyLjQxNDA2MiA2MTguMzMyMDMxIDMzMzcuMjA3MDMxIDUzMi4wNzQyMTkgMzMzNy4yMDcwMzEgQyA0NDguMTcxODc1IDMzMzcuMjA3MDMxIDM3OS41MTk1MzEgMzM4MS44MDA3ODEgMzc5LjUxOTUzMSAzNDU1LjczNDM3NSBDIDM3OS41MTk1MzEgMzUzMiA0MzEuNzQyMTg4IDM1NjMuNjg3NSA1MTkuNzU3ODEyIDM1ODYuNTcwMzEyIEMgNTk3LjIwNzAzMSAzNjA2LjUxMTcxOSA2MDcuMTc5Njg4IDM2MTcuNjcxODc1IDYwNy4xNzk2ODggMzY0MC41NTQ2ODggQyA2MDcuMTc5Njg4IDM2NjMuNDMzNTk0IDU4NC44ODI4MTIgMzY3Ni4zNDc2NTYgNTM3Ljk0MTQwNiAzNjc2LjM0NzY1NiBDIDQ5Ny40NjA5MzggMzY3Ni4zNDc2NTYgNDU5LjkwNjI1IDM2NjEuNjY3OTY5IDQyNS44NzUgMzYzMS43NTc4MTIgTCAzNjYuMDMxMjUgMzY5MS42MDE1NjIgQyA0MTIuMzc1IDM3NDEuNDY0ODQ0IDQ4My45NjA5MzggMzc1OS42NjAxNTYgNTM3Ljk0MTQwNiAzNzU5LjY2MDE1NiBDIDYyOC4zMDQ2ODggMzc1OS42NjAxNTYgNjk4LjcxMDkzOCAzNzIwLjM0Mzc1IDY5OC43MTA5MzggMzYzOS4zNzEwOTQgQyA2OTguNzEwOTM4IDM1NjQuMjczNDM4IDY1MS43NzM0MzggMzUzMi41ODU5MzggNTYzLjE3MTg3NSAzNTA5LjEyMTA5NCBDIDQ5MS41OTM3NSAzNDkwLjM0Mzc1IDQ2OC43MDMxMjUgMzQ4MS41NTA3ODEgNDY4LjcwMzEyNSAzNDU1LjczNDM3NSBNIDExMTguMDMxMjUgMzU3NS4yMDMxMjUgTCAxMTE4LjAzMTI1IDMzNDMuMDc0MjE5IEwgMTAyNy42MTcxODggMzM0My4wNzQyMTkgTCAxMDI3LjYxNzE4OCAzNTc4LjczMDQ2OSBDIDEwMjcuNjE3MTg4IDM2NDMuOTY0ODQ0IDk5OC4yNjU2MjUgMzY3Ny40NjA5MzggOTQzLjAxNTYyNSAzNjc3LjQ2MDkzOCBDIDg4Ny43NDIxODggMzY3Ny40NjA5MzggODU4LjM0NzY1NiAzNjQyLjc4OTA2MiA4NTguMzQ3NjU2IDM1NzUuNzkyOTY5IEwgODU4LjM0NzY1NiAzMzQzLjA3NDIxOSBMIDc2Ny45MTc5NjkgMzM0My4wNzQyMTkgTCA3NjcuOTE3OTY5IDM1NzguMTQ0NTMxIEMgNzY3LjkxNzk2OSAzNjk5LjE4NzUgODMxLjMyODEyNSAzNzYwLjgzOTg0NCA5NDEuODM1OTM4IDM3NjAuODM5ODQ0IEMgMTA1Mi4zMzU5MzggMzc2MC44Mzk4NDQgMTExOC4wMzEyNSAzNjk5Ljc2OTUzMSAxMTE4LjAzMTI1IDM1NzUuMjAzMTI1IE0gMTUzNy4zMTI1IDM0ODkuMTY3OTY5IEMgMTUzNy4zMTI1IDM0MDMuNTExNzE5IDE0NzguNjQwNjI1IDMzNDMuMDc0MjE5IDEzODAuMDc0MjE5IDMzNDMuMDc0MjE5IEwgMTIxMi4yNjU2MjUgMzM0My4wNzQyMTkgTCAxMjEyLjI2NTYyNSAzNzUzLjc5Njg3NSBMIDEzMDIuNjI1IDM3NTMuNzk2ODc1IEwgMTMwMi42MjUgMzQyNi4zOTg0MzggTCAxMzczLjAxOTUzMSAzNDI2LjM5ODQzOCBDIDE0MTcuNjIxMDk0IDM0MjYuMzk4NDM4IDE0NDUuNzkyOTY5IDM0NDkuMjgxMjUgMTQ0NS43OTI5NjkgMzQ4OS4xNjc5NjkgQyAxNDQ1Ljc5Mjk2OSAzNTI5LjA2NjQwNiAxNDE3LjYyMTA5NCAzNTUxLjk1MzEyNSAxMzczLjAxOTUzMSAzNTUxLjk1MzEyNSBMIDEzNTEuOTAyMzQ0IDM1NTEuOTUzMTI1IEwgMTM1MS45MDIzNDQgMzYzNS4yNzM0MzggTCAxMzgwLjA3NDIxOSAzNjM1LjI3MzQzOCBDIDE0NzguNjQwNjI1IDM2MzUuMjczNDM4IDE1MzcuMzEyNSAzNTc0LjgzNTkzOCAxNTM3LjMxMjUgMzQ4OS4xNjc5NjkgTSAxNjAyLjQ0OTIxOSAzNzUzLjc5Njg3NSBMIDE5MTQuOTg0Mzc1IDM3NTMuNzk2ODc1IEwgMTkxNC45ODQzNzUgMzY3My41MTk1MzEgTCAxNjkyLjEwOTM3NSAzNjczLjUxOTUzMSBMIDE2OTIuMTA5Mzc1IDM1ODcuMjMwNDY5IEwgMTg4NS42NTIzNDQgMzU4Ny4yMzA0NjkgTCAxODg1LjY1MjM0NCAzNTA2Ljk0OTIxOSBMIDE2OTIuMTA5Mzc1IDM1MDYuOTQ5MjE5IEwgMTY5Mi4xMDkzNzUgMzQyMy41OTM3NSBMIDE5MTIuMDQ2ODc1IDM0MjMuNTkzNzUgTCAxOTEyLjA0Njg3NSAzMzQzLjMxNjQwNiBMIDE2MDIuNDQ5MjE5IDMzNDMuMzE2NDA2IFogTSAyMzMzLjE0MDYyNSAzNzU4LjQ4ODI4MSBDIDIzNDguMzg2NzE5IDM3NTguNDg4MjgxIDIzNTQuODM5ODQ0IDM3NTcuMzIwMzEyIDIzNTQuODM5ODQ0IDM3NTcuMzIwMzEyIEwgMjM1NC44Mzk4NDQgMzY3OS44NjcxODggQyAyMzU0LjgzOTg0NCAzNjc5Ljg2NzE4OCAyMzUwLjc0NjA5NCAzNjgwLjQ1MzEyNSAyMzQ3LjIyNjU2MiAzNjgwLjQ1MzEyNSBDIDIzMTkuMDU0Njg4IDM2ODAuNDUzMTI1IDIyOTQuNDE0MDYyIDM2NjcuNTQyOTY5IDIyNTUuMDkzNzUgMzYyOC4yMzQzNzUgTCAyMjM5LjI2OTUzMSAzNjEyLjM4NjcxOSBDIDIyODUuNjA1NDY5IDM2MDQuNzU3ODEyIDIzNDIuNTMxMjUgMzU2MS4zMzU5MzggMjM0Mi41MzEyNSAzNDgzLjg5NDUzMSBDIDIzNDIuNTMxMjUgMzM5MS4xODc1IDIyNzQuNDUzMTI1IDMzNDMuMDc0MjE5IDIxODcuNjM2NzE5IDMzNDMuMDc0MjE5IEwgMTk5OS44NjcxODggMzM0My4wNzQyMTkgTCAxOTk5Ljg2NzE4OCAzNzUzLjc5Njg3NSBMIDIwOTAuMjI2NTYyIDM3NTMuNzk2ODc1IEwgMjA5MC4yMjY1NjIgMzQyNi4zOTg0MzggTCAyMTgwLjU3ODEyNSAzNDI2LjM5ODQzOCBDIDIyMjIuODIwMzEyIDM0MjYuMzk4NDM4IDIyNTAuOTk2MDk0IDM0NDYuMzM5ODQ0IDIyNTAuOTk2MDk0IDM0ODYuMjM4MjgxIEMgMjI1MC45OTYwOTQgMzUyNi4xNDA2MjUgMjIyMi44MjAzMTIgMzU0Ni4wODIwMzEgMjE4MC41NzgxMjUgMzU0Ni4wODIwMzEgTCAyMTM5LjUxNTYyNSAzNTQ2LjA4MjAzMSBMIDIxMzkuNTE1NjI1IDM2MjkuNDA2MjUgTCAyMTgxLjc1NzgxMiAzNjc0LjU4MjAzMSBDIDIyNTQuNTE1NjI1IDM3NTIuMDMxMjUgMjI4My44NDM3NSAzNzU4LjQ4ODI4MSAyMzMzLjE0MDYyNSAzNzU4LjQ4ODI4MSBNIDI4MzEuNTQyOTY5IDM1NDguNDM3NSBDIDI4MzEuNTQyOTY5IDM1MzAuODMyMDMxIDI4MjkuMjE4NzUgMzUxNi4xNjAxNTYgMjgyOS4yMTg3NSAzNTE2LjE2MDE1NiBMIDI2MjYuNzczNDM4IDM1MTYuMTYwMTU2IEwgMjYyNi43NzM0MzggMzU5NS4zNzUgTCAyNzMyLjM3NSAzNTk1LjM3NSBDIDI3MjAuNjQ4NDM4IDM2NDUuODI4MTI1IDI2ODAuNzQyMTg4IDM2NzYuMzQ3NjU2IDI2MTkuNzE4NzUgMzY3Ni4zNDc2NTYgQyAyNTUwLjQ4NDM3NSAzNjc2LjM0NzY1NiAyNTAwLjYwOTM3NSAzNjIxLjE5MTQwNiAyNTAwLjYwOTM3NSAzNTQ4LjQzNzUgQyAyNTAwLjYwOTM3NSAzNDc4LjAyNzM0NCAyNTUwLjQ4NDM3NSAzNDIxLjY5NTMxMiAyNjE5LjcxODc1IDM0MjEuNjk1MzEyIEMgMjY2Ny4yNTM5MDYgMzQyMS42OTUzMTIgMjY5Ni4wMDc4MTIgMzQzNC4wMTU2MjUgMjcyNy42Nzk2ODggMzQ2MS4wMDc4MTIgTCAyNzg5LjMwMDc4MSAzMzk5LjQwMjM0NCBDIDI3NDQuNzAzMTI1IDMzNTguMzI4MTI1IDI2OTcuMTY3OTY5IDMzMzYuMDMxMjUgMjYxOS43MTg3NSAzMzM2LjAzMTI1IEMgMjQ5My41NzQyMTkgMzMzNi4wMzEyNSAyNDA3LjkxNDA2MiAzNDMzLjQyOTY4OCAyNDA3LjkxNDA2MiAzNTQ4LjQzNzUgQyAyNDA3LjkxNDA2MiAzNjYzLjQzMzU5NCAyNDkzLjU3NDIxOSAzNzYwLjgzOTg0NCAyNjE5LjcxODc1IDM3NjAuODM5ODQ0IEMgMjc1My41MDM5MDYgMzc2MC44Mzk4NDQgMjgzMS41NDI5NjkgMzY2OC4xMjUgMjgzMS41NDI5NjkgMzU0OC40Mzc1IE0gMzExNy4yODkwNjIgMzU5NS45NjA5MzggTCAyOTk2LjQyMTg3NSAzNTk1Ljk2MDkzOCBMIDMwNTYuODU1NDY5IDM0NDguNjkxNDA2IFogTSAzMTgxLjgxNjQwNiAzNzUzLjc5Njg3NSBMIDMyNzQuNTQyOTY5IDM3NTMuNzk2ODc1IEwgMzA5OS42ODM1OTQgMzM0MC4xNDA2MjUgTCAzMDE0LjAyMzQzOCAzMzQwLjE0MDYyNSBMIDI4MzkuMTY3OTY5IDM3NTMuNzk2ODc1IEwgMjkzMS44NjMyODEgMzc1My43OTY4NzUgTCAyOTY0LjE1NjI1IDM2NzUuNzUzOTA2IEwgMzE0OS41NTA3ODEgMzY3NS43NTM5MDYgWiBNIDM1NTQuOTg4MjgxIDM0NTguMDc4MTI1IEwgMzYxNC44MzU5MzggMzM5OC4yMjY1NjIgQyAzNTg5LjAxOTUzMSAzMzcyLjQxNDA2MiAzNTQyLjY4MzU5NCAzMzM3LjIwNzAzMSAzNDU2LjQwNjI1IDMzMzcuMjA3MDMxIEMgMzM3Mi41MDc4MTIgMzMzNy4yMDcwMzEgMzMwMy44NTkzNzUgMzM4MS44MDA3ODEgMzMwMy44NTkzNzUgMzQ1NS43MzQzNzUgQyAzMzAzLjg1OTM3NSAzNTMyIDMzNTYuMDgyMDMxIDM1NjMuNjg3NSAzNDQ0LjA5NzY1NiAzNTg2LjU3MDMxMiBDIDM1MjEuNTQ2ODc1IDM2MDYuNTExNzE5IDM1MzEuNTI3MzQ0IDM2MTcuNjcxODc1IDM1MzEuNTI3MzQ0IDM2NDAuNTU0Njg4IEMgMzUzMS41MjczNDQgMzY2My40MzM1OTQgMzUwOS4yMTQ4NDQgMzY3Ni4zNDc2NTYgMzQ2Mi4yODkwNjIgMzY3Ni4zNDc2NTYgQyAzNDIxLjgxNjQwNiAzNjc2LjM0NzY1NiAzMzg0LjI1MzkwNiAzNjYxLjY2Nzk2OSAzMzUwLjIyMjY1NiAzNjMxLjc1NzgxMiBMIDMyOTAuMzc4OTA2IDM2OTEuNjAxNTYyIEMgMzMzNi43MTA5MzggMzc0MS40NjQ4NDQgMzQwOC4zMDQ2ODggMzc1OS42NjAxNTYgMzQ2Mi4yODkwNjIgMzc1OS42NjAxNTYgQyAzNTUyLjYzMjgxMiAzNzU5LjY2MDE1NiAzNjIzLjA0Njg3NSAzNzIwLjM0Mzc1IDM2MjMuMDQ2ODc1IDM2MzkuMzcxMDk0IEMgMzYyMy4wNDY4NzUgMzU2NC4yNzM0MzggMzU3Ni4xMjUgMzUzMi41ODU5MzggMzQ4Ny41MTk1MzEgMzUwOS4xMjEwOTQgQyAzNDE1LjkyNTc4MSAzNDkwLjM0Mzc1IDMzOTMuMDU0Njg4IDM0ODEuNTUwNzgxIDMzOTMuMDU0Njg4IDM0NTUuNzM0Mzc1IEMgMzM5My4wNTQ2ODggMzQzMi4yNjE3MTkgMzQxNi41MTU2MjUgMzQxOS4zNTE1NjIgMzQ1Ni40MDYyNSAzNDE5LjM1MTU2MiBDIDM0OTkuODI0MjE5IDM0MTkuMzUxNTYyIDM1MzAuMzUxNTYyIDM0MzQuMDE1NjI1IDM1NTQuOTg4MjgxIDM0NTguMDc4MTI1ICIvPgo8cGF0aCBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGw9InJnYigxMDAlLCAxMDAlLCAxMDAlKSIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNIDUyMzQuNDkyMTg4IDM0NTcuOTYwOTM4IEwgNTI5NC4zMDg1OTQgMzM5OC4xMDkzNzUgQyA1MjY4LjUyMzQzOCAzMzcyLjI5Njg3NSA1MjIyLjE2MDE1NiAzMzM3LjA4OTg0NCA1MTM1LjkwNjI1IDMzMzcuMDg5ODQ0IEMgNTA1Mi4wMTE3MTkgMzMzNy4wODk4NDQgNDk4My4zNjcxODggMzM4MS42Nzk2ODggNDk4My4zNjcxODggMzQ1NS42MTMyODEgQyA0OTgzLjM2NzE4OCAzNTMxLjg4NjcxOSA1MDM1LjU4NTkzOCAzNTYzLjU2NjQwNiA1MTIzLjYwNTQ2OSAzNTg2LjQ0OTIxOSBDIDUyMDEuMDU0Njg4IDM2MDYuMzk0NTMxIDUyMTEuMDAzOTA2IDM2MTcuNTU0Njg4IDUyMTEuMDAzOTA2IDM2NDAuNDMzNTk0IEMgNTIxMS4wMDM5MDYgMzY2My4zMjAzMTIgNTE4OC43MTg3NSAzNjc2LjIyNjU2MiA1MTQxLjc2NTYyNSAzNjc2LjIyNjU2MiBDIDUxMDEuMjg5MDYyIDM2NzYuMjI2NTYyIDUwNjMuNzU3ODEyIDM2NjEuNTQ2ODc1IDUwMjkuNzMwNDY5IDM2MzEuNjMyODEyIEwgNDk2OS44NTU0NjkgMzY5MS40ODQzNzUgQyA1MDE2LjIxODc1IDM3NDEuMzUxNTYyIDUwODcuNzc3MzQ0IDM3NTkuNTM5MDYyIDUxNDEuNzY1NjI1IDM3NTkuNTM5MDYyIEMgNTIzMi4xNDA2MjUgMzc1OS41MzkwNjIgNTMwMi41NTA3ODEgMzcyMC4yMjY1NjIgNTMwMi41NTA3ODEgMzYzOS4yNTM5MDYgQyA1MzAyLjU1MDc4MSAzNTY0LjE1MjM0NCA1MjU1LjYyODkwNiAzNTMyLjQ2ODc1IDUxNjcuMDIzNDM4IDM1MDkuMDAzOTA2IEMgNTA5NS40MzM1OTQgMzQ5MC4yMjY1NjIgNTA3Mi41MzEyNSAzNDgxLjQyOTY4OCA1MDcyLjUzMTI1IDM0NTUuNjEzMjgxIEMgNTA3Mi41MzEyNSAzNDMyLjE0MDYyNSA1MDk1Ljk5MjE4OCAzNDE5LjIzODI4MSA1MTM1LjkwNjI1IDM0MTkuMjM4MjgxIEMgNTE3OS4zMjgxMjUgMzQxOS4yMzgyODEgNTIwOS44MjQyMTkgMzQzMy45MDIzNDQgNTIzNC40OTIxODggMzQ1Ny45NjA5MzggIi8+CjxwYXRoIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbD0icmdiKDEwMCUsIDEwMCUsIDEwMCUpIiBmaWxsLW9wYWNpdHk9IjEiIGQ9Ik0gNDY3NS44OTQ1MzEgMzU5NS44Mzk4NDQgTCA0NzM2LjM1OTM3NSAzNDQ4LjU3MDMxMiBMIDQ3OTYuNzY1NjI1IDM1OTUuODM5ODQ0IFogTSA0Nzc5LjE2MDE1NiAzMzQwLjAxOTUzMSBMIDQ2OTMuNDk2MDk0IDMzNDAuMDE5NTMxIEwgNDUxOC42NDQ1MzEgMzc1My42NzU3ODEgTCA0NjExLjM2NzE4OCAzNzUzLjY3NTc4MSBMIDQ2NDMuNjMyODEyIDM2NzUuNjMyODEyIEwgNDgyOS4wNTg1OTQgMzY3NS42MzI4MTIgTCA0ODYxLjMyMDMxMiAzNzUzLjY3NTc4MSBMIDQ5NTQuMDQ2ODc1IDM3NTMuNjc1NzgxIFogTSA0Nzc5LjE2MDE1NiAzMzQwLjAxOTUzMSAiLz4KPHBhdGggZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsPSJyZ2IoMTAwJSwgMTAwJSwgMTAwJSkiIGZpbGwtb3BhY2l0eT0iMSIgZD0iTSA0NDQ0LjU3ODEyNSAzNzU4LjM3MTA5NCBDIDQ0NTkuODI4MTI1IDM3NTguMzcxMDk0IDQ0NjYuMzA0Njg4IDM3NTcuMTk5MjE5IDQ0NjYuMzA0Njg4IDM3NTcuMTk5MjE5IEwgNDQ2Ni4zMDQ2ODggMzY3OS43NDYwOTQgQyA0NDY2LjMwNDY4OCAzNjc5Ljc0NjA5NCA0NDYyLjE3OTY4OCAzNjgwLjMzNTkzOCA0NDU4LjY3OTY4OCAzNjgwLjMzNTkzOCBDIDQ0MzAuNTA3ODEyIDM2ODAuMzM1OTM4IDQ0MDUuODY3MTg4IDM2NjcuNDIxODc1IDQzNjYuNTM5MDYyIDM2MjguMTE3MTg4IEwgNDM1MC43MDMxMjUgMzYxMi4yNjU2MjUgQyA0Mzk3LjA2NjQwNiAzNjA0LjY0MDYyNSA0NDUzLjk2ODc1IDM1NjEuMjE4NzUgNDQ1My45Njg3NSAzNDgzLjc3NzM0NCBDIDQ0NTMuOTY4NzUgMzM5MS4wNjY0MDYgNDM4NS45MTAxNTYgMzM0Mi45NTcwMzEgNDI5OS4wNzAzMTIgMzM0Mi45NTcwMzEgTCA0MTExLjMyMDMxMiAzMzQyLjk1NzAzMSBMIDQxMTEuMzIwMzEyIDM3NTMuNjc1NzgxIEwgNDIwMS42NjQwNjIgMzc1My42NzU3ODEgTCA0MjAxLjY2NDA2MiAzNDI2LjI3MzQzOCBMIDQyOTIuMDM1MTU2IDM0MjYuMjczNDM4IEMgNDMzNC4yNzczNDQgMzQyNi4yNzM0MzggNDM2Mi40NDkyMTkgMzQ0Ni4yMjI2NTYgNDM2Mi40NDkyMTkgMzQ4Ni4xMjEwOTQgQyA0MzYyLjQ0OTIxOSAzNTI2LjAyMzQzOCA0MzM0LjI3NzM0NCAzNTQ1Ljk2NDg0NCA0MjkyLjAzNTE1NiAzNTQ1Ljk2NDg0NCBMIDQyNTAuOTY4NzUgMzU0NS45NjQ4NDQgTCA0MjUwLjk2ODc1IDM2MjkuMjg5MDYyIEwgNDI5My4yMTA5MzggMzY3NC40NjA5MzggQyA0MzY1Ljk0OTIxOSAzNzUxLjkxNDA2MiA0Mzk1LjMwMDc4MSAzNzU4LjM3MTA5NCA0NDQ0LjU3ODEyNSAzNzU4LjM3MTA5NCAiLz4KPHBhdGggZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsPSJyZ2IoMTAwJSwgMTAwJSwgMTAwJSkiIGZpbGwtb3BhY2l0eT0iMSIgZD0iTSAzOTUxLjkxNzk2OSAzNjMyLjI5Mjk2OSBDIDM5NTEuOTE3OTY5IDM2NjIuNzgxMjUgMzkyNy44NjcxODggMzY3Ni44NjcxODggMzg4OC4wMTE3MTkgMzY3Ni44NjcxODggTCAzNzgwLjY4MzU5NCAzNjc2Ljg2NzE4OCBMIDM3ODAuNjgzNTk0IDM0MjQuNzEwOTM4IEwgMzg2OS44MjAzMTIgMzQyNC43MTA5MzggQyAzOTA3Ljk0MTQwNiAzNDI0LjcxMDkzOCAzOTI5LjA0Njg3NSAzNDM5Ljk1MzEyNSAzOTI5LjA0Njg3NSAzNDY2LjkyNTc4MSBMIDM5MjkuMDQ2ODc1IDM0NjguMDg5ODQ0IEMgMzkyOS4wNDY4NzUgMzQ5OC41OTM3NSAzOTAzLjg0NzY1NiAzNTExLjQ4NDM3NSAzODYzLjk2MDkzOCAzNTExLjQ4NDM3NSBMIDM4MjkuOTkyMTg4IDM1MTEuNDg0Mzc1IEwgMzgyOS45OTIxODggMzU4Ni41NDY4NzUgTCAzODg1LjA2NjQwNiAzNTg2LjU0Njg3NSBDIDM5MzEuNDAyMzQ0IDM1ODYuNTQ2ODc1IDM5NTEuOTE3OTY5IDM2MDMuNTYyNSAzOTUxLjkxNzk2OSAzNjMxLjExNzE4OCBaIE0gMzk2NC44MTI1IDM1NDEuMzkwNjI1IEMgMzk5NC4xNjAxNTYgMzUyNC45NzI2NTYgNDAxOC43Njk1MzEgMzQ5OS4xNzE4NzUgNDAxOC43Njk1MzEgMzQ1Mi44NDM3NSBMIDQwMTguNzY5NTMxIDM0NTEuNjgzNTk0IEMgNDAxOC43Njk1MzEgMzQyMy41MzUxNTYgNDAwOS40MTAxNTYgMzQwMC42Njc5NjkgMzk5MC42Mjg5MDYgMzM4MS44OTQ1MzEgQyAzOTY3LjE2Nzk2OSAzMzU4LjQzMzU5NCAzOTMwLjIyMjY1NiAzMzQ1LjUzOTA2MiAzODgzLjMzMjAzMSAzMzQ1LjUzOTA2MiBMIDM2OTIuNzI2NTYyIDMzNDUuNTM5MDYyIEwgMzY5Mi43MjY1NjIgMzc1Ni4wMTk1MzEgTCAzODg4LjAxMTcxOSAzNzU2LjAxOTUzMSBDIDM5ODAuNjc5Njg4IDM3NTYuMDE5NTMxIDQwNDEuNjQ0NTMxIDM3MTguNDkyMTg4IDQwNDEuNjQ0NTMxIDM2NDMuNDI5Njg4IEwgNDA0MS42NDQ1MzEgMzY0Mi4yNTM5MDYgQyA0MDQxLjY0NDUzMSAzNTg3LjE0NDUzMSA0MDEyLjMyNDIxOSAzNTU5LjU3MDMxMiAzOTY0LjgxMjUgMzU0MS4zOTA2MjUgIi8+Cjwvc3ZnPgo="; /* cole aqui o logo em data URI para fixá-lo no arquivo */
+const U = {kg:['kcal/kg','kg','kg/mês'], l:['kcal/L','litro','L/mês'], m3:['kcal/Nm³','m³','m³/mês'], kwh:['kcal/kWh','kWh','kWh/mês']};
+const D = [
+["Álcool de cana",5500,"l"],["Aparas vinilo",6300,"kg"],["Bagaço de cana (20% água)",3200,"kg"],["Bagaço de cana (50% água)",1800,"kg"],
+["Bambu (10% água)",3700,"kg"],["Borra de café",1570,"kg"],["Carvão de babaçu",7000,"kg"],["Carvão mineral - Cambuí/PR",6200,"kg"],
+["Carvão mineral - Charqueadas/RS",3100,"kg"],["Carvão mineral - Mina do Leão/RS",4200,"kg"],["Carvão mineral - Tubarão/SC",4500,"kg"],
+["Carvão vegetal",7500,"kg"],["Casca de algodão",3000,"kg"],["Casca de amêndoa dendê",4800,"kg"],["Casca de arroz (12% água)",3300,"kg"],
+["Casca de árvore",2200,"kg"],["Casca de babaçu",4000,"kg"],["Casca de cacau (8% água)",3900,"kg"],["Casca de café",3800,"kg"],
+["Casca de caju",4700,"kg"],["Casca de coco",4000,"kg"],["Casca de eucalipto",3750,"kg"],["Casca de soja",3300,"kg"],
+["Casca de tanino úmido (68% água)",800,"kg"],["Cavaco (eucalipto)",4300,"kg"],["Cavacos de pinho",2500,"kg"],["Coque de gás",5400,"kg"],
+["Coque de lenha",7600,"kg"],["Coque metalúrgico",7200,"kg"],["Energia elétrica",860,"kwh"],["Fibras de palmeira (48% água)",2000,"kg"],
+["Fibras de palmito",3800,"kg"],["Filme polietileno",5600,"kg"],["Gás de água",4000,"m3"],["Gás de água carburetado",6000,"m3"],
+["Gás de alto forno",700,"m3"],["Gás de biodigestor (biogás)",5000,"m3"],["Gás de coqueria",4300,"m3"],["Gás de gasogênio",1260,"m3"],
+["Gás de nafta",4220,"m3"],["Gás natural",9000,"m3"],["Lascas de madeira",3300,"kg"],["Lenha (40% água)",2400,"kg"],
+["Lenha seca (12% água)",3680,"kg"],["Madeira de caixotes",3800,"kg"],["Madeira muito seca",4800,"kg"],["Madeira pinho (seca ao ar)",3500,"kg"],
+["Madeira verde",2500,"kg"],["Óleo BPF",9000,"kg"],["Óleo combustível 1A",9750,"kg"],["Óleo combustível 1B",9940,"kg"],
+["Óleo combustível 2A",9550,"kg"],["Óleo combustível 2B",9920,"kg"],["Óleo combustível 3A",9500,"kg"],["Óleo combustível 3B",9870,"kg"],
+["Óleo diesel",8620,"l"],["Óleo de algodão",8050,"l"],["Óleo de amendoim",8000,"l"],["Óleo de babaçu",7770,"l"],["Óleo de soja",8125,"l"],
+["Palha de amendoim (12% água)",3100,"kg"],["Palha de trigo (20% água)",3200,"kg"],["Papel",4200,"kg"],["Piche alcatrão",8600,"kg"],
+["Pó de linho",4000,"kg"],["Pó de madeira fino (seco)",4000,"kg"],["Pó de madeira grosso (seco)",4200,"kg"],["Pó de tabaco",2300,"kg"],
+["Querosene",8300,"l"],["Recortes de couro (14% água)",4400,"kg"],["Resíduos de juta",3800,"kg"],["Restos de borracha",4000,"kg"],
+["Sementes de girassol (9,5% água)",4300,"kg"],["Serragem de pinho (40% água)",2000,"kg"],["Serragem seca (20% água)",3500,"kg"],
+["Serragem + cepilho (seco)",4600,"kg"],["Sisal (11% água)",3400,"kg"],["Sobra de serraria (pinho)",4160,"kg"],["Tecido náilon",7300,"kg"],
+["Trapos de pano",4200,"kg"],["Turfa (25 a 6% água)",4000,"kg"]
+];
+const PCI_GLP=11500;
+function effPad(n,u){ if(u==='kwh')return 98; if(u==='m3')return 92; if(/Óleo|Querosene|Álcool|Piche/.test(n))return 90; if(/Carvão|Coque/.test(n))return 85; return 87; }
+const $=id=>document.getElementById(id);
+const z=v=>Math.abs(v)<0.005?0:v;
+const brl=v=>z(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2});
+const brl0=v=>z(Math.round(v)).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const num=(v,d=0)=>z(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=v=>z(v*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const g=id=>{const v=parseFloat($(id).value);return isFinite(v)?v:0};
+
+let tab='simulador';
+const sel=$('fuel');
+D.forEach((d,i)=>{const o=document.createElement('option');o.value=i;o.textContent=d[0];sel.appendChild(o)});
+sel.value=D.findIndex(d=>d[0]==='Lenha (40% água)');
+function applyFuel(){const d=D[sel.value],u=U[d[2]];
+  $('uPreco').textContent='R$/'+u[1]; $('uCons').textContent=u[2]; $('effAtual').value=effPad(d[0],d[2]);}
+sel.addEventListener('change',()=>{applyFuel();calc()});
+
+
+function verdict(el,eco,nome,extra){
+  if(Math.abs(eco)<0.5){el.className='verdict eq';el.innerHTML='<span class="badge">=</span>Os custos são equivalentes'}
+  else if(eco>0){el.className='verdict pos';el.innerHTML='<span class="badge">✓</span>Saldo a favor do GLP'+(extra||'')}
+  else {el.className='verdict neg';el.innerHTML='<span class="badge">!</span>Saldo a favor do sistema atual ('+nome+')'}
+}
+function tone(el,v){el.classList.toggle('pos-c',v>0.5);el.classList.toggle('neg-c',v<-0.5)}
+const sgn=v=>(v>0.5?'+':'')+brl0(v);
+
+function calc(){
+  const d=D[sel.value],u=U[d[2]],nome=d[0],pciA=d[1];
+  const pA=g('pAtual'),cA=g('cAtual'),pG=g('pGlp');
+
+  /* ===== SIMULADOR (fórmulas da aba Simulador) ===== */
+  const H14=pciA?PCI_GLP/pciA-1:0;
+  const H16=cA*pciA/PCI_GLP;
+  const H18=pG*H16, K18=pA*cA;
+  const H20=K18-H18, H22=H20*12;
+  const H24=H18?K18/H18-1:0;
+
+  $('pciAtualTxt').textContent=num(pciA)+' '+u[0];
+  $('lblEf').textContent='Eficiência do PCI do GLP vs '+nome;
+  $('efPci').textContent=pct(H14);
+  $('cGlpTxt').textContent=num(H16,2)+' kg/mês';
+  $('custoGlp').textContent=brl(H18)+'/mês';
+  $('custoAtual').textContent=brl(K18)+'/mês';
+
+  $('kEco').innerHTML=sgn(H20)+'<small>/mês</small>'; tone($('kEco'),H20);
+  $('kEcoAno').textContent=sgn(H22); tone($('kEcoAno'),H22);
+  $('kPct').textContent=pct(H24); tone($('kPct'),H24);
+  verdict($('verdict'),H20,nome);
+
+  const mx=Math.max(K18,H18,1);
+  $('bAtual').style.width=(K18/mx*100)+'%'; $('bGlp').style.width=(H18/mx*100)+'%';
+  $('vAtual').textContent=brl0(K18); $('vGlp').textContent=brl0(H18); $('nmAtual').textContent=nome;
+  window._bars={atual:[nome,K18,cA,u[2]],glp:['GLP',H18,H16,'kg/mês']};
+  const eqS=PCI_GLP/pciA;
+  $('eqVal').textContent=num(eqS,2)+' '+(u[1]==='litro'?'L':u[1]);
+  $('eqName').textContent='de '+nome;
+
+  /* ===== ESTUDO DE CONVERSÃO (Memo. Calc.) ===== */
+  $('simResumo').innerHTML=`<div><span>Preço ${nome}</span><b>${brl(pA)}/${u[1]}</b></div><div><span>Consumo atual</span><b>${num(cA)} ${u[2]}</b></div><div><span>Preço GLP</span><b>${brl(pG)}/kg</b></div>`;
+  $('lblEffA').textContent=nome; $('thAtual').textContent=nome;
+  const effA=g('effAtual')/100, effG=g('effGlp')/100;
+  const C16=pciA*effA, D16=PCI_GLP*effG, C17=C16*cA;
+  const E16=D16?C17/D16:0;
+  const combA=K18, combG=pG*E16;
+  const tH=g('tHfp'),tP=g('tHp'),eP=g('e_pis')/100,eI=g('e_icms')/100;
+  const el=p=>{const f=g(p+'kw')*g(p+'hfp')*g(p+'dias'),h=g(p+'kw')*g(p+'hp')*g(p+'dias');const b=f*tH+h*tP;return{b}};
+  const eA=el('a_'),eG=el('g_');
+  const pisA=combA*g('a_pis')/100+eA.b*eP, pisG=combG*g('g_pis')/100+eG.b*eP;
+  const icmA=combA*g('a_icms')/100+eA.b*eI, icmG=combG*g('g_icms')/100+eG.b*eI;
+  const outA=g('a_mangas')+g('a_insumos'), outG=g('g_mangas');
+  const manA=g('a_manut')+g('a_depr'), manG=g('g_manut')+g('g_depr');
+  const parA=combA+eA.b+outA+manA, parG=combG+eG.b+outG+manG;
+  const totA=parA-pisA-icmA, totG=parG-pisG-icmG, eco=totA-totG;
+  const rows=[['Combustível',combA,combG],['Energia elétrica',eA.b,eG.b],['Mangas e insumos',outA,outG],['Manutenção e depreciação',manA,manG],
+    ['Total parcial',parA,parG,'sub'],['Crédito de PIS/COFINS',-pisA,-pisG],['Crédito de ICMS',-icmA,-icmG],['Total com créditos',totA,totG,'tot']];
+  const dc=v=>Math.abs(v)<0.5?'':(v>0?'pos-t':'neg-t');
+  $('tDet').innerHTML=rows.map(r=>`<tr class="${r[3]||''}"><td>${r[0]}</td><td>${brl(r[1])}</td><td>${brl(r[2])}</td><td class="${dc(r[1]-r[2])}">${brl(r[1]-r[2])}</td></tr>`).join('')+
+    `<tr><td>Total anual</td><td>${brl0(totA*12)}</td><td>${brl0(totG*12)}</td><td class="${dc(eco)}">${brl0(eco*12)}</td></tr>`;
+  $('tEq').innerHTML=`<tr><td><i class="dot glp"></i>GLP</td><td>${num(PCI_GLP)} kcal/kg</td><td>${pct(effG)}</td><td>${num(D16)}</td><td>${brl(D16?pG/D16*1000:0)}</td></tr>
+    <tr><td><i class="dot atual"></i>${nome}</td><td>${num(pciA)} ${u[0]}</td><td>${pct(effA)}</td><td>${num(C16)}</td><td>${brl(C16?pA/C16*1000:0)}</td></tr>`;
+  const eqD=C16?D16/C16:0;
+  $('dEquiv').textContent=`Com a eficiência de queima, 1 kg de GLP equivale a ${num(eqD,2)} ${u[1]==='litro'?'L':u[1]} de ${nome}. No Simulador, sem eficiência, seriam ${num(H16)} kg/mês.`;
+  $('dEco').innerHTML=sgn(eco)+'<small>/mês</small>'; tone($('dEco'),eco);
+  $('dEcoAno').textContent=sgn(eco*12); tone($('dEcoAno'),eco);
+  $('dGlp').textContent=num(E16);
+  const inv=g('invest');
+  $('dPay').textContent=inv>0&&eco>0?num(inv/eco,1)+' meses':(inv>0?'sem retorno':'—');
+  verdict($('dVerdict'),eco,nome,totA>0?' ('+pct(eco/totA)+' de redução)':'');
+  const cli=$('cliente').value.trim(), proc=$('processo').value.trim();
+  $('report').textContent=
+`ESTUDO DE CONVERSÃO ENERGÉTICA — GLP x ${nome}${cli?'\nCliente: '+cli:''}${proc?'\nProcesso: '+proc:''}
+
+1. Características dos combustíveis
+• GLP: PCI ${num(PCI_GLP)} kcal/kg, eficiência ${pct(effG)} → PCI corrigido ${num(D16)} — preço ${brl(pG)}/kg
+• ${nome}: PCI ${num(pciA)} ${u[0]}, eficiência ${pct(effA)} → PCI corrigido ${num(C16)} — preço ${brl(pA)}/${u[1]}
+
+2. Equivalência energética
+Simulador (somente PCI): 1,00 kg de GLP = ${num(eqS,2)} ${u[1]} de ${nome}
+Com eficiência de queima: 1,00 kg de GLP = ${num(eqD,2)} ${u[1]} de ${nome}
+
+3. Estimativa de consumo
+• ${nome}: ${num(cA)} ${u[2]}
+• GLP previsto: ${num(E16)} kg/mês (Simulador: ${num(H16)} kg/mês)
+
+4. Análise econômica (mês)
+• Sistema atual: ${brl(totA)}  (${brl0(totA*12)}/ano)
+• Sistema a GLP: ${brl(totG)}  (${brl0(totG*12)}/ano)
+${Math.abs(eco)<0.5?'Os custos são equivalentes.':(eco>0?'Saldo a favor do GLP':'Saldo a favor do sistema atual')+': '+brl(Math.abs(eco))+'/mês — '+brl0(Math.abs(eco*12))+'/ano.'}${inv>0&&eco>0?'\nPayback estimado do investimento ('+brl0(inv)+'): '+num(inv/eco,1)+' meses.':''}
+
+5. Ganhos operacionais não considerados
+Limpeza do ambiente de trabalho; facilidade de operação; aprovação de órgãos ambientais; resposta térmica mais rápida; dispensa de tratamento de gases de combustão.
+
+Os dados de eficiência são empíricos e podem variar de acordo com o processo.`;
+}
+
+const tip=$('tip');
+document.querySelectorAll('.cmp-row').forEach(t=>{
+  t.addEventListener('mousemove',e=>{const b=window._bars[t.dataset.k];
+    tip.innerHTML=`<b>${b[0]}</b><br>${brl(b[1])}/mês, ${brl0(b[1]*12)}/ano<br>${num(b[2])} ${b[3]}`;
+    tip.style.left=Math.min(e.clientX+14,innerWidth-230)+'px';tip.style.top=(e.clientY-70)+'px';tip.style.opacity=1});
+  t.addEventListener('mouseleave',()=>tip.style.opacity=0);
+});
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.go)));
+function renderPci(){const q=$('busca').value.toLowerCase();
+  $('tPci').innerHTML=D.map((d,i)=>[d,i]).filter(([d])=>d[0].toLowerCase().includes(q)).map(([d,i])=>
+    `<tr data-i="${i}" style="cursor:pointer"><td>${d[0]}</td><td>${num(d[1])}</td><td>${U[d[2]][0]}</td><td>${num(PCI_GLP/d[1],2)} ${U[d[2]][1]}</td></tr>`).join('');}
+$('busca').addEventListener('input',renderPci);
+$('tPci').addEventListener('click',e=>{const tr=e.target.closest('tr');if(!tr)return;sel.value=tr.dataset.i;applyFuel();setTab('simulador');calc()});
+
+function setTab(t){tab=t;
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(p=>p.hidden=p.dataset.panel!==t);
+  if(t==='tabela')renderPci(); calc(); window.scrollTo(0,0);
+  try{history.replaceState(null,'','#'+t)}catch(e){}}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('report').textContent);$('copy').textContent='Resumo copiado'}catch(e){$('copy').textContent='Selecione o texto e copie'}setTimeout(()=>$('copy').textContent='Copiar resumo',1800)});
+document.addEventListener('input',e=>{if(e.target.id!=='busca')calc()});
+(function(){const btn=$('logoBtn'),f=$('logoFile');
+  const show=src=>{btn.classList.remove('empty');btn.innerHTML='<img alt="Supergasbras" src="'+src+'">'};
+  if(window.LOGO_SRC)show(window.LOGO_SRC); else {try{const v=localStorage.getItem('sg_logo');if(v)show(v)}catch(e){}}
+  if(!window.LOGO_SRC)btn.addEventListener('click',()=>f.click());
+  f.addEventListener('change',()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{show(r.result);try{localStorage.setItem('sg_logo',r.result)}catch(e){}};r.readAsDataURL(file)});
+})();
+applyFuel();
+const h=location.hash.slice(1); setTab(['simulador','estudo','tabela'].includes(h)?h:'simulador');
+</script>
+</body>
+</html>
